@@ -25,7 +25,7 @@ RUN npm run build
 
 # --- Stage 3: runtime image (only prod deps + built assets) ---
 # Express serves API routes and static files from public/.
-FROM node:22-bookworm-slim AS runner
+FROM node:24.12.0-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4000
@@ -33,8 +33,8 @@ ENV PORT=4000
 COPY Backend/package.json Backend/package-lock.json ./
 RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 
-COPY --from=Backend-build /app/dist ./dist
-COPY --from=Frontend-build /app/Frontend/dist ./public
+COPY --from=backend-build /app/dist ./dist
+COPY --from=frontend-build /app/Frontend/dist ./public
 
 EXPOSE 4000
 USER node
