@@ -3,10 +3,14 @@ import cors from "cors"
 import {clerkMiddleware} from "@clerk/express"
 import fs from "fs"
 import path from "path"
+import clerkWebhook from "./webhooks/clerk.webhook.js" 
 
 const app = express()
 
 const publicDir = path.join(process.cwd(), "public")
+
+// it's important that you don't parse the webhook event data, it should be in the raw format
+app.use("/api/webhooks/clerk", express.raw({type: "application/json"}), clerkWebhook)
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
