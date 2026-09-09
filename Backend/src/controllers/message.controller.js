@@ -4,6 +4,7 @@ import {ApiError} from "../lib/apiError.js"
 import {ApiResponse} from "../lib/apiResponse.js"
 import {Message} from "../models/message.model.js"
 import {hasImageKitConfig, uploadChatMedia} from  "../lib/imagekit.js"
+import { getReceiverSocket, io } from "../lib/socket.js"
 
 const getUserForSidebar = asyncHandler(async(req, res) => {
     try {
@@ -147,7 +148,12 @@ const sendMessage = asyncHandler(async(req, res) => {
 
         await newMessage.save()
 
-        // Todo : realtime with socketio
+        const receiverSocketId = getReceiverSocket(recieverId)
+
+        if(receiverSocketId){
+            // Only send the message in real time if user is online
+            io.to(receiverSocketId).emit("newMessage", newMessage)
+        }
 
         res
         .status(201)

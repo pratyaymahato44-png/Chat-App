@@ -2,6 +2,7 @@ import "dotenv/config"
 import connectDB from "./db/index.js"
 import app from "./app.js"
 import job from "./lib/cronJob.js"
+import { server } from "./lib/socket.js"
 
 const PORT = process.env.PORT || 8000
 
@@ -13,7 +14,7 @@ app.get("/health", (req, res) => {
 
 connectDB()
 .then( () => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log("server is running on PORT", PORT)
     })
 
