@@ -1,6 +1,6 @@
-import { asyncHandler } from "../lib/asyncHandler";
-import { ApiError } from "../lib/apiError";
-import { ApiResponse } from "../lib/apiResponse";
+import { asyncHandler } from "../lib/asyncHandler.js";
+import { ApiError } from "../lib/apiError.js";
+import { ApiResponse } from "../lib/apiResponse.js";
 
 
 export const checkAuth = asyncHandler(async(req, res) => {

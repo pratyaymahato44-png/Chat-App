@@ -1,7 +1,7 @@
 import { getAuth } from "@clerk/express";
-import { User } from "../models/user.model";
-import { asyncHandler } from "../lib/asyncHandler";
-import { ApiError } from "../lib/apiError";
+import { User } from "../models/user.model.js";
+import { asyncHandler } from "../lib/asyncHandler.js";
+import { ApiError } from "../lib/apiError.js";
 
 
 export const protectRoute = asyncHandler(async (req, res, next) => {

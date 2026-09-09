@@ -21,11 +21,13 @@
   "dependencies": {
     "@clerk/backend": "^3.17.1",
     "@clerk/express": "^2.1.66",
+    "@imagekit/nodejs": "^7.11.0",
     "cors": "^2.8.6",
     "cron": "^4.4.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.9.5"
+    "mongoose": "^9.9.5",
+    "multer": "^2.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
