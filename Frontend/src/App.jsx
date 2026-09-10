@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router';
 import { useAuth } from '@clerk/react';
 import ChatPage from './Pages/ChatPage';
 import AuthPage from './Pages/AuthPage';
+import PageLoader from './components/PageLoader';
 
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
 	const { isSignedIn, isLoaded } = useAuth()
 
 	if(!isLoaded){
-		<p>Loading...</p>
+		return <PageLoader />
 	}
 
 	return (
@@ -20,7 +21,7 @@ function App() {
 				<h1 className='text-3xl text-center'>This is a Chat App</h1>
 				<Routes>
 					<Route path='/' element={isSignedIn ? <ChatPage /> : <Navigate to={"/auth"} replace />} />
-					<Route path='/auth' element={!isSignedIn ? <AuthPage /> : <Navigate to={"/chat"} replace />} />
+					<Route path='/auth' element={!isSignedIn ? <AuthPage /> : <Navigate to={"/"} replace />} />
 				</Routes>
 			</WallpaperProvider>
 		</ThemeProvider>
