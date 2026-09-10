@@ -1,8 +1,13 @@
-
+import toast from "react-hot-toast"
 
 
 function ChatPage(){
-    return 
+    return (
+        <div>
+            ChatPage
+            <button onClick={() => toast.success("You clicked")}>click me</button>
+        </div>
+    )
 }
 
 export default ChatPage
