@@ -26,8 +26,6 @@ import authRouter from "./routes/auth.route.js"
 import messageRouter from "./routes/message.route.js"
  
 
-
-
 // rotes declaration
 app.use("/api/auth", authRouter)
 app.use("/api/auth", messageRouter)

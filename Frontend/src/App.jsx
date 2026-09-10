@@ -1,25 +1,30 @@
-import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
+import { ThemeProvider } from './context/themeContext';
+import { WallpaperProvider } from './context/wallpaperContext';
+import { Navigate, Route, Routes } from 'react-router';
+import { useAuth } from '@clerk/react';
+import ChatPage from './Pages/ChatPage';
+import AuthPage from './Pages/AuthPage';
+
 
 function App() {
 
+	const { isSignedIn, isLoaded } = useAuth()
 
-  return (
-    <>
-    <h1>This is a Chat App</h1>
+	if(!isLoaded){
+		<p>Loading...</p>
+	}
 
-    <header>
-        <Show when="signed-out">
-          <SignInButton mode='modal'/>
-          <SignUpButton mode='modal'/>
-        </Show>
-        <Show when="signed-in">
-          <UserButton />
-        </Show>
-      </header>
-    </>
-
-
-  )
+	return (
+		<ThemeProvider>
+			<WallpaperProvider>
+				<h1 className='text-3xl text-center'>This is a Chat App</h1>
+				<Routes>
+					<Route path='/' element={isSignedIn ? <ChatPage /> : <Navigate to={"/auth"} replace />} />
+					<Route path='/auth' element={!isSignedIn ? <AuthPage /> : <Navigate to={"/chat"} replace />} />
+				</Routes>
+			</WallpaperProvider>
+		</ThemeProvider>
+	)
 }
 
 export default App
