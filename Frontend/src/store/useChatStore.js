@@ -1,11 +1,13 @@
 import { create } from "zustand";
+import {persist} from "zustand/middleware"
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
 import toast from "react-hot-toast";
 
-export const useChatStore = create((set, get) => ({
+export const useChatStore = create(persist(
+    (set, get) => ({
     users: [],
-    conversation: [],
+    conversations: [],
     messages: [],
     selectedUser: null,
     isConversationLoading: false,
@@ -18,16 +20,17 @@ export const useChatStore = create((set, get) => ({
     isSoundEnabled: true,
     isSendingMedia: false,
 
-    getUers: async () => {
+    getUsers: async () => {
         set({ isUserLoading: true})
 
         try {
             const response = await axiosInstance.get("/messages/users")
 
+            const users = response.data.data
             set((state) => ({
-                users: response.data,
+                users: users,
 
-                seletedUser: state.selectedUser && response.data.some((user) => user._id === state.selectedUser._id) ? state.selectedUser : null
+                selectedUser: state.selectedUser && users.some((user) => user._id === state.selectedUser._id) ? state.selectedUser : null
             }))
         } catch (error) {
             console.error("Error in get User", error)
@@ -41,7 +44,7 @@ export const useChatStore = create((set, get) => ({
 
         try {
             const response = await axiosInstance.get("/messages/conversations")
-            set({ conversation: response.data})
+            set({ conversations: response.data.data})
         } catch (error) {
             console.error("Error in get conversation", error)
         } finally{
@@ -49,14 +52,14 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    getMessage: async (userId) => {
+    getMessages: async (userId) => {
         if(!userId) return
         set({ isMessageLoading: true })
 
         try {
             const response = await axiosInstance.get(`/messages/${userId}`)
 
-            set({ messages: response.data })
+            set({ messages: response.data.data })
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to load messages")
         } finally {
@@ -70,14 +73,15 @@ export const useChatStore = create((set, get) => ({
         if(!selectedUser) return false
 
         try {
-            const response = await axiosInstance.post(`/messages/send/$selectedUser._id`, messageData)
-            set({messages: [...messages, response.data], composerText: ""})
+            const response = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData)
+            set({messages: [...messages, response.data.data], composerText: ""})
     
             get().getConversations()
             return true
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to send message")
-            return false        }
+            return false  
+        }
     },
 
     subscribeToMessages: (userId) => {
@@ -99,16 +103,16 @@ export const useChatStore = create((set, get) => ({
 
     unSubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket
-        socket?.off("getMessage")
+        socket?.off("newMessage")
     },
 
-    setSelectedUser: (selecteduser) => set({ selecteduser }),
+    setSelectedUser: (selectedUser) => set({ selectedUser }),
 
     setActiveConversationId: (activeConversationId) => {
         set((state) => ({
             activeConversationId,
 
-            selectedUser: state.find((user) => user._id === activeConversationId) || state.conversations.find((user) => user._id === activeConversationId) || null,
+            selectedUser: state.users.find((user) => user._id === activeConversationId) || state.conversations.find((user) => user._id === activeConversationId) || null,
 
             messages: activeConversationId ? state.messages : []
 
@@ -131,7 +135,7 @@ export const useChatStore = create((set, get) => ({
     sendMedia: async({ conversationId, file }) => {
         if(!conversationId || !file) return false
 
-        const formData = new formData()
+        const formData = new FormData()
         formData.append("media", file)
 
         set({ isSendingMedia: true})
@@ -144,4 +148,9 @@ export const useChatStore = create((set, get) => ({
             set({ isSendingMedia: false })
         }
     }
-}))
+}),
+{
+    name: "imassage-storage",
+    partialize: (state) => ({isSoundEnabled: state.isSoundEnabled})
+}   
+))

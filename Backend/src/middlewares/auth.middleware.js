@@ -5,8 +5,8 @@ import { ApiError } from "../lib/apiError.js";
 
 
 export const protectRoute = asyncHandler(async (req, res, next) => {
-    try {
-        const {userId} = getAuth()
+
+        const {userId} = getAuth(req)
 
         if(!userId){
             throw new ApiError(401, "Unauthorize access")
@@ -22,7 +22,4 @@ export const protectRoute = asyncHandler(async (req, res, next) => {
 
         next()
 
-    } catch (error) {
-        throw new ApiError(500, error?.message || "Internal server error")
-    }
 })

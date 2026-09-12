@@ -37,7 +37,6 @@ function App() {
 	return (
 		<ThemeProvider>
 			<WallpaperProvider>
-				<h1 className='text-3xl text-center'>This is a Chat App</h1>
 				<Routes>
 					<Route path='/' element={isSignedIn ? <ChatPage /> : <Navigate to={"/auth"} replace />} />
 					<Route path='/auth' element={!isSignedIn ? <AuthPage /> : <Navigate to={"/"} replace />} />

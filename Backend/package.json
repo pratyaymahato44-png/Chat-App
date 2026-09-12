@@ -16,7 +16,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "shx rm -rf dist && shx cp -R src dist",
     "dev": "nodemon ./src/index.js",
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "db:seed": "node ./src/seeds/user.seed.js"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.1",

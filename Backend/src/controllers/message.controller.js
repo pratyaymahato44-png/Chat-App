@@ -125,13 +125,13 @@ const sendMessage = asyncHandler(async(req, res) => {
         const { id: recieverId }= req.params
         const senderId = req.user._id
 
+        let videoUrl
+        let imageUrl
+
         if(req.file){
             if(!hasImageKitConfig){
                 throw new ApiError(500, "Media upload is not configured")
             }
-
-            let videoUrl
-            let imageUrl
 
             const url = await uploadChatMedia(req.file)
             if(req.file.mimetype.startsWith("video/"))  videoUrl = url
@@ -161,7 +161,7 @@ const sendMessage = asyncHandler(async(req, res) => {
             new ApiResponse(201, newMessage, "Message has sent successfully")
         )
     } catch (error) {
-        throw  ApiError(500, error.message || "Internal server Error")
+        throw  new ApiError(500, error.message || "Internal server Error")
     }
 })
 

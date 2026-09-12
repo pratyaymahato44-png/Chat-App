@@ -57,8 +57,8 @@ function WallpaperPicker() {
     return (
         <Modal.Root state={modal}>
             <Modal.Trigger>
-                <Button variant="ghost" size="sm" isIconOnly className="text-foreground">
-                    <ImageIcon className="size-5" />
+                <Button variant="ghost" size="sm" isIconOnly aria-label="Choose wallpaper"  className="text-foreground">
+                    <ImageIcon className="size-5" aria-hidden="true" />
                 </Button>
             </Modal.Trigger>
 
