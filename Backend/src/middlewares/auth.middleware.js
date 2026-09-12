@@ -8,11 +8,13 @@ export const protectRoute = asyncHandler(async (req, res, next) => {
 
         const {userId} = getAuth(req)
 
+
         if(!userId){
             throw new ApiError(401, "Unauthorize access")
         }
 
         const user = await User.findOne({clerkId: userId})
+
 
         if(!user){
             throw new ApiError(404, "User profile is not synced yet")
@@ -22,4 +24,7 @@ export const protectRoute = asyncHandler(async (req, res, next) => {
 
         next()
 
+
+
 })
+

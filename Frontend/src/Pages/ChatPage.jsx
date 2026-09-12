@@ -6,10 +6,13 @@ import ChatSidebar from "../components/chat/ChatSidebar"
 import ChatHeader from "../components/chat/ChatHeader"
 import MessageList from "../components/chat/MessageList"
 import ChatComposer from "../components/chat/ChatComposer"
+import { useAuthStore } from "../store/useAuthStore"
 
 
 function ChatPage() {
     const { frameStyle } = useWallpaper()
+    const authUser = useAuthStore((state) => state.authUser)
+    const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth)
     const getConversations = useChatStore((state) => state.getConversations)
     const getMessages = useChatStore((state) => state.getMessages)
     const getUsers = useChatStore((state) => state.getUsers)
@@ -19,9 +22,11 @@ function ChatPage() {
     const { activeConversation, activeConversationId, isLargeScreen } = useSelectedConversation()
 
     useEffect(() => {
+        if(isCheckingAuth) return
+        if(!authUser) return
         getUsers()
         getConversations()
-    }, [getConversations, getUsers])
+    }, [isCheckingAuth, authUser, getConversations, getUsers])
 
     useEffect(() => {
         if (!activeConversationId) return

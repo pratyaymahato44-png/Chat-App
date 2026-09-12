@@ -19,6 +19,12 @@ const messageSchema = new Schema({
     },
     video: {
         type: String
+    },
+    imageFileId: {
+        type: String
+    },
+    videoFileId: {
+        type: String
     }
 }, {timestamps: true})
 

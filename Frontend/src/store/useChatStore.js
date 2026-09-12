@@ -74,7 +74,9 @@ export const useChatStore = create(persist(
 
         try {
             const response = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData)
-            set({messages: [...messages, response.data.data], composerText: ""})
+            set((state) => ({
+                messages: [...messages, response.data.data], composerText: ""
+            }))
     
             get().getConversations()
             return true
@@ -92,6 +94,8 @@ export const useChatStore = create(persist(
         if(!socket) return
 
         socket.off("newMessage")
+        socket.off("messageDeleted")
+
         socket.on("newMessage", (newMessage) => {
             if(String(newMessage.senderId) !== String(userId)) return
 
@@ -99,11 +103,22 @@ export const useChatStore = create(persist(
 
             get().getConversations()
         })
+
+        socket.on("messageDeleted", (messageId) => {
+            set((state) => ({
+                messages: state.messages.filter((message) => message._id !== messageId) 
+            }))
+
+            get().getConversations()
+        })
+
     },
 
     unSubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket
         socket?.off("newMessage")
+
+        socket?.off("messageDeleted")
     },
 
     setSelectedUser: (selectedUser) => set({ selectedUser }),
@@ -146,6 +161,25 @@ export const useChatStore = create(persist(
             console.error("Media send failed", error)
         } finally{
             set({ isSendingMedia: false })
+        }
+    },
+    deleteMessage: async (messageId) => {
+        if(!messageId) return false
+
+        try {
+            await axiosInstance.delete(`/messages/${messageId}`)
+
+            set((state) => ({
+                messages: state.messages.filter((message) => message._id !== messageId)
+            }))
+
+            toast.success("Message deleted")
+            return true
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message || "Failed to delete message"
+            )
+            return false
         }
     }
 }),

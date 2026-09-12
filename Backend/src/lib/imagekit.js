@@ -23,10 +23,21 @@ async function uploadChatMedia(file){
         folder: "/chat"
     })
 
-    return result.url
+    return {
+        url: result.url,
+        fileId: result.fileId
+    }
+}
+
+async function deleteChatMedia(fileId){
+    if(!fileId) return
+
+    await imagekit.files.delete(fileId)
+
 }
 
 export {
     hasImageKitConfig,
-    uploadChatMedia
+    uploadChatMedia,
+    deleteChatMedia
 }

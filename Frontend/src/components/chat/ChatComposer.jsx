@@ -8,7 +8,7 @@ import { useSelectedConversation } from "../../hooks/useSelectedConversation";
 function ChatComposer() {
   const composerText = useChatStore((state) => state.composerText);
   const isSoundEnabled = useChatStore((state) => state.isSoundEnabled);
-  const sendMediaMessage = useChatStore((state) => state.sendMediaMessage);
+  const sendMediaMessage = useChatStore((state) => state.sendMedia);
   const isSendingMedia = useChatStore((state) => state.isSendingMedia);
   const sendTextMessage = useChatStore((state) => state.sendTextMessage);
   const setComposerText = useChatStore((state) => state.setComposerText);

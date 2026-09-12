@@ -3,7 +3,7 @@ import { User } from "../models/user.model.js"
 import {ApiError} from "../lib/apiError.js"
 import {ApiResponse} from "../lib/apiResponse.js"
 import {Message} from "../models/message.model.js"
-import {hasImageKitConfig, uploadChatMedia} from  "../lib/imagekit.js"
+import {deleteChatMedia, hasImageKitConfig, uploadChatMedia} from  "../lib/imagekit.js"
 import { getReceiverSocket, io } from "../lib/socket.js"
 
 const getUserForSidebar = asyncHandler(async(req, res) => {
@@ -127,15 +127,23 @@ const sendMessage = asyncHandler(async(req, res) => {
 
         let videoUrl
         let imageUrl
+        let videoFileId
+        let imageFileId
 
         if(req.file){
-            if(!hasImageKitConfig){
+            if(!hasImageKitConfig()){
                 throw new ApiError(500, "Media upload is not configured")
             }
 
-            const url = await uploadChatMedia(req.file)
-            if(req.file.mimetype.startsWith("video/"))  videoUrl = url
-            else  imageUrl = url         
+            const uploadedMedia = await uploadChatMedia(req.file)
+            if(req.file.mimetype.startsWith("video/")){
+                videoUrl = uploadedMedia.url
+                videoFileId = uploadedMedia.fileId
+            }  
+            else {
+                imageUrl = uploadedMedia.url
+                imageFileId = uploadedMedia.fileId
+            }        
         }
 
         const newMessage = new Message({
@@ -143,7 +151,9 @@ const sendMessage = asyncHandler(async(req, res) => {
             recieverId,
             text,
             image: imageUrl,
-            video: videoUrl
+            video: videoUrl,
+            imageFileId,
+            videoFileId
         })
 
         await newMessage.save()
@@ -165,9 +175,52 @@ const sendMessage = asyncHandler(async(req, res) => {
     }
 })
 
+const deleteMessage = asyncHandler(async(req, res) => {
+    try {
+        const {id: messageId } = req.params
+        const loggedInUserId = req.user._id
+
+        const message = await Message.findById(messageId)
+
+        if(!message){
+            throw new ApiError(401, "Message not found")
+        }
+
+        if(message.senderId.toString() !== loggedInUserId.toString()){
+            throw new ApiError(403, "You can delete your own message")
+        }
+
+        if(message.imageFileId){
+            await deleteChatMedia(message.imageFileId)
+        }
+
+        if(message.videoFileId){
+            await deleteChatMedia(message.videoFileId)
+        }
+
+        await Message.findByIdAndDelete(messageId)
+
+        const receiverSocketId = getReceiverSocket(message.recieverId.toString())
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("messageDeleted", messageId)
+        }
+
+        res
+        .status(200)
+        .json(
+            new ApiResponse(200, { messageId }, "Message deleted Successfully")
+        )
+
+    } catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || "Failed to delete Message")
+    }
+})
+
 export {
     getUserForSidebar,
     getConversationForSidebar,
     getMessages,
-    sendMessage
+    sendMessage,
+    deleteMessage
 }

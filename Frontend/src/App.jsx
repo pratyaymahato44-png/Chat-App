@@ -12,7 +12,7 @@ import { Toaster } from 'react-hot-toast';
 
 function App() {
 
-	const { isSignedIn, isLoaded } = useAuth()
+	const { isSignedIn, isLoaded, getToken } = useAuth()
 
 	// const {checkAuthentication, clearAuthentication, isCheckingAuth} = useAuthStore()
 
@@ -25,10 +25,10 @@ function App() {
 	useEffect(() => {
 		if(!isLoaded) return
 
-		if(isSignedIn) checkAuth()
+		if(isSignedIn) checkAuth(getToken)
 		else clearAuth()
 
-	}, [checkAuth, clearAuth, isLoaded, isSignedIn])
+	}, [checkAuth, clearAuth, isLoaded, isSignedIn, getToken])
 
 	if(!isLoaded || (isSignedIn && isCheckingAuth)){
 		return <PageLoader />

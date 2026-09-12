@@ -1,57 +1,63 @@
-import { create } from "zustand"
-import { axiosInstance } from "../lib/axios"
-import {io} from "socket.io-client"
+import { create } from "zustand";
+import { axiosInstance } from "../lib/axios";
+import { io } from "socket.io-client";
 
-
-const baseURL = import.meta.env.MODE === "development" ? "http://localhost:4000" : "/"
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:4000" : "/";
 
 export const useAuthStore = create((set, get) => ({
-    authUser: null,
-    isCheckingAuth: true,
-    onlineUsers: [],
-    socket: null,
+  authUser: null,
+  isCheckingAuth: true,
+  onlineUsers: [],
+  socket: null,
 
-    checkAuthentication: async () => {
-        set({ isCheckingAuth: true})
+  checkAuthentication: async (getTocken) => {
+    set({ isCheckingAuth: true });
 
-        try {
-            const response = await axiosInstance.get("/auth/check")
-            const user = response.data.data
+    try {
 
-            set({authUser: user})
-            get().connectSocket(user)
+        const token = await getTocken()
 
-        } catch (error) {
-            console.error("Error in CheckAuth", error)
-            set({authUser: null})
-        } finally{
-            set({ isCheckingAuth: false})
+        if(!token){
+            throw new Error("clerk token is not available")
         }
-    },
+      const response = await axiosInstance.get("/auth/check", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+      });
 
-    clearAuthentication: () => {
-        set({authUser: null, isCheckingAuth: false, onlineUsers: []})
-        get().disConnectSocket()
-    },
+      const user = response.data.data
+      set({ authUser: user });
 
-    connectSocket: (user) => {
-
-        const isConnected = get().socket?.connected
-        if(!user || isConnected) return
-
-        const socket = io(baseURL, {query: {userId: user._id}})
-
-        set({ socket: socket })
-
-        socket.on("getOnlineUsers", (userIds) => {
-            set({ onlineUsers: userIds })
-        })
-    },
-
-    disConnectSocket: () => {
-        const socket = get().socket
-        if(socket?.connected) socket.disconnect()
-            set({ socket: null })
+      get().connectSocket(user);
+    } catch (error) {
+      console.error("Error in checkAuth:", error);
+      set({ authUser: null });
+    } finally {
+      set({ isCheckingAuth: false });
     }
-   
-}))
+  },
+
+  clearAuth: () => {
+    set({ authUser: null, isCheckingAuth: false, onlineUsers: [] });
+    get().disconnectSocket();
+  },
+
+  connectSocket: (user) => {
+    if (!user || get().socket?.connected) return;
+
+    const socket = io(BASE_URL, { query: { userId: user._id } });
+
+    set({ socket });
+
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: () => {
+    const socket = get().socket;
+    if (socket?.connected) socket.disconnect();
+    set({ socket: null });
+  },
+}));

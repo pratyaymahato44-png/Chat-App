@@ -21,6 +21,7 @@ app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(clerkMiddleware())
 
 
+
 // import routes 
 import authRouter from "./routes/auth.route.js"
 import messageRouter from "./routes/message.route.js"
